@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard - Envio Fácil</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="box">
+    <h2>Disparo de Emails</h2>
+
+    <textarea id="emails" placeholder="Emails separados por vírgula"></textarea>
+    <input id="assunto" placeholder="Assunto" />
+    <textarea id="mensagem" placeholder="Mensagem HTML"></textarea>
+
+    <button id="btnDisparo">Disparar</button>
+    <p id="status"></p>
+  </div>
+
+  <script src="dasboard.js"></script>
+
+
+
+
+  <h3>Histórico de envios</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Email</th>
+      <th>Assunto</th>
+      <th>Status</th>
+      <th>Data</th>
+    </tr>
+  </thead>
+  <tbody id="historico"></tbody>
+</table>
+</body>
+</html>
+
+
+

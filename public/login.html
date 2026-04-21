@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Envio Fácil</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <div class="login-container">
+    <h1>Login</h1>
+
+    <form id="formLogin">
+      <input type="email" id="email" placeholder="Seu e-mail" required>
+      <input type="password" id="senha" placeholder="Sua senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+
+    <div id="pixStatus" style="margin-top:15px;"></div>
+
+    <div id="pixBox" style="display:none; margin-top:15px;"></div>
+
+    <button id="btnPix" type="button" style="display:none; margin-top:10px;">
+      Gerar PIX
+    </button>
+
+    <a href="cadastro.html" class="link">Criar conta</a>
+  </div>
+
+<script>
+const form = document.getElementById("formLogin");
+const pixBox = document.getElementById("pixBox");
+const pixStatus = document.getElementById("pixStatus");
+const btnPix = document.getElementById("btnPix");
+
+let txidAtual = null;
+let checkStatusInterval = null;
+
+// ================= LOGIN =================
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+
+  try {
+    const res = await fetch("http://localhost:4000/usuarios/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha })
+    });
+
+    const data = await res.json();
+
+    if (!data.ok) {
+      alert(data.error || "Login inválido");
+      return;
+    }
+
+    if (data.user.status !== "ativa") {
+      alert("Conta inativa ou expirada. Gere um novo PIX.");
+      btnPix.style.display = "block";
+      btnPix.onclick = () => gerarPix(data.user.id);
+      return;
+    }
+
+    alert("Login realizado com sucesso!");
+    window.location.href = "dashboard.html";
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao conectar com o servidor");
+  }
+});
+
+// ================= GERAR PIX =================
+async function gerarPix(userId) {
+  btnPix.disabled = true;
+  pixStatus.innerText = "⏳ Gerando PIX...";
+  pixBox.style.display = "none";
+
+  try {
+    const res = await fetch("http://localhost:4000/pix/criar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.qr_code_base64) {
+      pixStatus.innerText = data.erro || "Erro ao gerar PIX";
+      return;
+    }
+
+    txidAtual = data.txid;
+
+    const img = document.createElement("img");
+    img.src = `data:image/png;base64,${data.qr_code_base64}`;
+    img.style.maxWidth = "300px";
+
+    const input = document.createElement("input");
+    input.value = data.copiaCola;
+    input.readOnly = true;
+    input.style.width = "100%";
+
+    const copiar = document.createElement("button");
+    copiar.innerText = "Copiar código PIX";
+    copiar.onclick = () => {
+      input.select();
+      document.execCommand("copy");
+      copiar.innerText = "Copiado!";
+      setTimeout(() => copiar.innerText = "Copiar código PIX", 2000);
+    };
+
+    pixBox.innerHTML = "";
+    pixBox.append(img, input, copiar);
+    pixBox.style.display = "block";
+    pixStatus.innerText = "⏱️ Aguardando pagamento...";
+
+    if (checkStatusInterval) clearInterval(checkStatusInterval);
+
+    checkStatusInterval = setInterval(async () => {
+      const statusRes = await fetch(`http://localhost:4000/pix/status/${txidAtual}`);
+      const statusData = await statusRes.json();
+
+      if (statusData.status === "approved") {
+        pixStatus.innerText = "✅ Pagamento confirmado!";
+        clearInterval(checkStatusInterval);
+
+        await fetch(`http://localhost:4000/usuarios/ativar/${userId}`, {
+          method: "PATCH"
+        });
+
+        alert("Conta ativada! Faça login novamente.");
+        window.location.reload();
+      }
+    }, 5000);
+
+  } catch (err) {
+    console.error(err);
+    pixStatus.innerText = "Erro ao gerar PIX";
+  } finally {
+    btnPix.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
