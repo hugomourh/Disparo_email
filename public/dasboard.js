@@ -1,13 +1,13 @@
 const btnDisparo = document.getElementById("btnDisparo");
 const status = document.getElementById("status");
 
-// valida email
+
 function validarEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 }
 
-// disparo de emails
+
 btnDisparo.addEventListener("click", async () => {
   const emails = document.getElementById("emails").value
     .split(",")
@@ -55,7 +55,7 @@ btnDisparo.addEventListener("click", async () => {
       document.getElementById("emails").value = "";
       document.getElementById("assunto").value = "";
       document.getElementById("mensagem").value = "";
-      carregarHistorico(); // atualiza histórico
+      carregarHistorico(); 
     } else {
       status.innerText = `❌ ${data.erro || "Erro ao enviar"}`;
     }
@@ -68,7 +68,6 @@ btnDisparo.addEventListener("click", async () => {
   }
 });
 
-// ------------------ HISTÓRICO ------------------
 async function carregarHistorico() {
   const token = localStorage.getItem("token");
   if (!token) return;

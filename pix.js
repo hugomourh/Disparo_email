@@ -8,10 +8,9 @@ export async function criarPix(req, res) {
     const userId = req.user.id;
     const email = req.user.email;
 
-    // chave única para evitar duplicidade
     const externalReference = `${userId}-${Date.now()}`;
 
-    // corpo da requisição para o Mercado Pago
+    
     const body = {
       transaction_amount: VALOR_PLANO,
       description: "Plano mensal R$29,99",
@@ -37,7 +36,6 @@ export async function criarPix(req, res) {
       return res.status(400).json({ erro: "Erro ao gerar PIX", detalhe: data });
     }
 
-    // pega dados do QR Code
     const pixData = data.point_of_interaction?.transaction_data;
 
     if (!pixData) {
@@ -45,7 +43,7 @@ export async function criarPix(req, res) {
       return res.status(400).json({ erro: "Erro ao gerar PIX", detalhe: data });
     }
 
-    // salva pagamento pendente no banco
+
     await pool.query(
       "INSERT INTO pagamentos_pix (user_id, txid, status, valor) VALUES ($1,$2,$3,$4)",
       [userId, externalReference, "pending", VALOR_PLANO]

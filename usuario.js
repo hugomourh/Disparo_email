@@ -4,7 +4,6 @@ import pool from "./db.js";
 
 const router = express.Router();
 
-// ================= CADASTRO / CONFIRMAÇÃO =================
 router.post("/", async (req, res) => {
   const { name, email, senha } = req.body;
 
@@ -25,14 +24,14 @@ router.post("/", async (req, res) => {
         });
       }
 
-      // PENDENTE → PERMITE PAGAMENTO
+
       return res.json({
         ok: true,
         existente: true
       });
     }
 
-    // USUÁRIO NOVO
+    
     const senhaHash = await bcrypt.hash(senha, 10);
 
     await pool.query(

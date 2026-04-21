@@ -12,7 +12,7 @@ form.addEventListener("submit", async (e) => {
   const senha = document.getElementById("senha").value;
 
   try {
-    // cria usuário
+   
     const res = await fetch("/usuarios", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -28,11 +28,10 @@ form.addEventListener("submit", async (e) => {
 
     statusEl.textContent = "Conta criada! Agora finalize o pagamento.";
 
-    // mostra área de pagamento
     pagamentoDiv.style.display = "block";
 
     // gera PIX
-    const token = data.token; // o token retornado no backend
+    const token = data.token; 
     const pixRes = await fetch("/pix/criar", {
       method: "POST",
       headers: { 
@@ -49,7 +48,7 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    // mostra QR Code e link
+    
     pixBox.innerHTML = `
       <img src="data:image/png;base64,${dataPix.qr_code_base64}" alt="QR Code PIX" style="max-width:300px;"/>
       <p>Código PIX: <code>${dataPix.qr_code}</code></p>
